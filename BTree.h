@@ -110,14 +110,17 @@ void btree::split_child(node_btree* node, int i)
     {
         rightc->datas[q] = app_child->datas[q + max_degree / 2 + 1];
         rightc->children[q] = app_child->children[q + max_degree / 2 + 1];
-        if(debug_btree){printf("2\n", par_child); }
-        rightc->children[q]->which_child = q;
+        if(rightc->children[q]){rightc->children[q]->which_child = q;}
 //        rightc->nodes[q] = app_child->nodes[q + max_degree / 2 + 1];
 //        rightc->nodes[q]->self = rightc;
     }
     if(debug_btree){printf("1\n", par_child); }
     rightc->children[max_degree - max_degree / 2 - 1] = app_child->children[max_degree];
-    rightc->children[max_degree - max_degree / 2 - 1]->which_child = max_degree - max_degree / 2 - 1;
+    if(rightc->children[max_degree - max_degree / 2 - 1])
+    {
+        rightc->children[max_degree - max_degree / 2 - 1]->which_child = max_degree - max_degree / 2 - 1;
+
+    }
     rightc->how_many = max_degree - max_degree / 2 - 1;
     if(debug_btree){printf("Right completed: "); rightc->print();}
     for(int q = max_degree / 2; q < max_degree; q++)
@@ -132,10 +135,18 @@ void btree::split_child(node_btree* node, int i)
     for(int q = max_degree; q > i + 1; q--)
     {
         node->children[q] = node->children[q - 1];
-        node->children[q]->which_child = q;
+        if(node->children[q])
+        {
+            node->children[q]->which_child = q;
+        }
+
     }
     node->children[i + 1] = rightc;
-    node->children[i + 1]->which_child = i + 1;
+    if(node->children[i + 1])
+    {
+        node->children[i + 1]->which_child = i + 1;
+
+    }
     if(debug_btree){printf("Splitted, And new is\n"); preorder_print();}
 
 }
