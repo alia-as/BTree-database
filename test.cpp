@@ -25,6 +25,10 @@ int main()
     tree.preorder_print();
     cout << tree.del_val(50) << endl;
     tree.preorder_print();
+    tree.push(30);
+    tree.preorder_print();
+    tree.push(50);
+    tree.preorder_print();
 
 
 
@@ -43,6 +47,6 @@ int main()
 //    {
 //        thet.print(i);
 //    }
-
+//
 
 }
