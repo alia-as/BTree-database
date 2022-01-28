@@ -25,6 +25,8 @@ class node_btree
     int which_child = -1; // the order of this child according to his parent
 //    node_table *nodes[max_degree];
     void print(string ending = "\n");
+    void shift(int, int, bool);
+
 };
 class btree
 {
@@ -38,7 +40,176 @@ public:
     void preorder_print();
     bool do_we_have(int);
     int puny();
+    bool del_val(int);
 };
+void node_btree::shift(int start, int ending, bool is_right) // Index ending will be deleted in is_right, else index start will be deleted
+{
+    if(is_right)
+    {
+        for(int i = ending; i > start; i--)
+        {
+            datas[i] = datas[i - 1];
+            children[i] = children[i - 1];
+            if(children[i])
+            {
+                children[i]->which_child++;
+            }
+        }
+        children[ending + 1] = children[ending];
+        datas[start] = 0;
+
+    }
+    else
+    {
+        for(int i = start; i < ending; i++)
+        {
+            datas[i] = datas[i + 1];
+            children[i] = children[i + 1];
+            if(children[i])
+            {
+                children[i]->which_child--;
+            }
+        }
+        children[ending] = children[ending + 1];
+        datas[ending] = 0;
+        children[ending + 1] = 0;
+    }
+}
+bool btree::del_val(int val)
+{
+    node_btree *temp = root;
+    int i = 0;
+    while(true)
+    {
+        i = 0;
+        while(i < temp->how_many && val > temp->datas[i])
+        {
+            i++;
+        }
+        if(val == temp->datas[i])
+        {
+            break;
+        }
+        else
+        {
+            if(temp->children[i])
+            {
+                temp = temp->children[i];
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    if(debug_btree){printf("We are going to delete the member no.%d from: ", i);temp->print();}
+    if(temp->children[i])
+    {
+        if(debug_btree){cout << "temp isn't leaf\n";}
+        node_btree *temp2 = temp;
+        temp = temp->children[i];
+        if(debug_btree)
+        {
+            cout << "finding pre\n---------------\nOne to left: ";
+            temp->print();
+        }
+        while(temp->children[temp->how_many])
+        {
+            temp = temp->children[temp->how_many];
+            if(debug_btree)
+            {
+                cout << "Sharp right: ";
+                temp->print();
+            }
+        }
+        int predecessor = temp->datas[temp->how_many - 1];
+        if(debug_btree)
+        {
+            printf("Finded: %d\n", predecessor);
+            cout << "------------------\n";
+        }
+        temp2->datas[i] = predecessor;
+        i = temp->how_many - 1;
+    }
+    if(debug_btree){cout << "Now temp is leaf\n";}
+    // Now temp is leaf
+    if(temp->how_many > max_degree / 2)
+    {
+        if(debug_btree){cout << "It seems that's an easy deletion!\n";}
+        // shifting
+        temp->shift(i, max_degree - 1, false);
+        temp->how_many--;
+
+    }
+    else
+    {
+        node_btree *rs = 0, *ls = 0;
+        cout << temp << " && " << temp->parent << endl;
+        if(temp->which_child < temp->parent->how_many)
+        {
+            if(debug_btree){cout << "has right!\n";}
+            rs = temp->parent->children[temp->which_child + 1];
+        }
+        if(temp->which_child > 0)
+        {
+            if(debug_btree){cout << "has left!\n";}
+            ls = temp->parent->children[temp->which_child - 1];
+
+        }
+        if(debug_btree){cout << "rs: " << rs << "  ls= " << ls << endl;}
+        if(rs && rs->how_many > max_degree / 2)
+        {
+            if(debug_btree){cout << "right sibling can lend!\n";}
+            temp->shift(i, max_degree - 1, false);
+            temp->datas[temp->how_many - 1] = temp->parent->datas[temp->which_child];
+            temp->parent->datas[temp->which_child] = rs->datas[0];
+            rs->shift(0, rs->how_many, false);
+
+        }
+        else if(ls && ls->how_many > max_degree / 2)
+        {
+            if(debug_btree){cout << "left sibling can lend!\n";}
+            temp->shift(0, i, true);
+            temp->datas[0] = temp->parent->datas[temp->which_child - 1];
+            temp->parent->datas[temp->which_child - 1] = ls->datas[ls->how_many - 1];
+            ls->datas[ls->how_many - 1] = 0;
+
+        }
+        else
+        {
+            if(ls)
+            {
+                ls->datas[ls->how_many] = ls->parent->datas[ls->which_child];
+                ls->how_many++;
+                for(int w = 0; w < temp->how_many - 1; w++)
+                {
+                    if(w != i)
+                    {
+                        ls->datas[ls->how_many] = temp->datas[w];
+                        ls->how_many++;
+
+                    }
+
+                }
+                ls->parent->shift(ls->which_child, max_degree - 1, false);
+            }
+            else
+            {
+                temp->shift(i, max_degree - 1, i++);
+                temp->datas[temp->how_many - 1] = temp->parent->datas[temp->which_child];
+                for(int w = 0; w < rs->how_many; w++)
+                {
+                    temp->datas[temp->how_many] = rs->datas[w];
+                    temp->how_many++;
+                }
+                temp->parent->shift(temp->which_child, max_degree - 1, false);
+                temp->parent->children[temp->which_child] = temp;
+
+            }
+        }
+    }
+    return true;
+}
 int btree::puny()
 {
     int i = 1;
@@ -100,12 +271,12 @@ void btree::split_child(node_btree* node, int i)
         node->datas[q] = node->datas[q - 1];
     }
     node->datas[i] = par_child;
-    if(debug_btree){printf("1\n", par_child); }
 //    node->nodes[i] = app_child->nodes[max_degree / 2];
 //    node->nodes[i]->self = node;
     node->how_many++;
     // app_child become left child of that strange kid and new 'rightc' node become the right kid of him
     node_btree *rightc = new node_btree;
+    rightc->parent = node;
     for(int q = 0; q < max_degree - max_degree / 2 - 1; q++)
     {
         rightc->datas[q] = app_child->datas[q + max_degree / 2 + 1];
@@ -130,6 +301,7 @@ void btree::split_child(node_btree* node, int i)
 //        app_child->nodes[q] = 0;
     }
     app_child->how_many = max_degree / 2;
+    app_child->parent = node;
     if(debug_btree){printf("Left completed: "); app_child->print();}
     // Putting the new child in its place
     for(int q = max_degree; q > i + 1; q--)
