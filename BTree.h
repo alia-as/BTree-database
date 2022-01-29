@@ -22,15 +22,67 @@ public:
     void print();
     void shifting(int, int ending = max_degree - 1, bool);
     btree_node();
-    void split();
+
 };
 class btree
 {
 public:
     btree_node *root = 0;
     void push(int);
+    void split(btree_node*);
 
 };
+void btree::split(btree_node *node)
+{
+    int mid_ind = max_degree / 2;
+    btree_node_section *par_child = node->nodes[mid_ind];
+    node->nodes[mid_ind] = 0;
+    // Building both child nodes
+    btree_node *right_child = new btree_node;
+    right_child->parent = node->parent;
+    right_child->which_child = node->which_child + 1;
+    for(int i = 0; i < max_degree - mid_ind - 1; i++)
+    {
+        right_child->children[i] = node->children[i + mid_ind + 1];
+        if(right_child->children[i])
+        {
+            right_child->children[i]->which_child = i;
+        }
+        node->children[i + mid_ind + 1] = 0;
+        right_child->nodes[i] = node->nodes[i + mid_ind + 1];
+        node->nodes[i + mid_ind + 1] = 0
+    }
+    right_child->children[max_degree - mid_ind - 1] = node->children[max_degree];
+
+    right_child->how_many = max_degree - mid_ind - 1;
+    node->how_many = mid_ind;
+
+    // Building completed
+    // Go for putting that child higher
+
+    btree_node *parent;
+    if(node == root)
+    {
+        parent = new btree_node;
+        parent->nodes[0] = par_child;
+        parent->children[0] = node;
+        parent->children[1] = right_child;
+        parent->how_many = 1;
+        node->parent = parent;
+        node->which_child = 0;
+        right_child->parent = parent;
+        right_child->which_child = 1;
+        root = parent;
+    }
+    else
+    {
+        node->parent->shifting(node->which_child, ,false);
+        node->parent->nodes[node->which_child] = par_child;
+        node->parent->children[node->which_child + 1] = right_child;
+        node->parent->how_many++;
+    }
+
+}
 void btree::push(int val)
 {
     if(!root)
