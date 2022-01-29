@@ -5,26 +5,10 @@
 using namespace std;
 unsigned int field_count;
 
-//class node
-//{
-//public:
-//    int data;
-//    node *nextField = 0;
-//    node_btree *self = 0;
-//};
-class record
-{
-    friend class table;
-//    node_table *id;
-    void push(int[]);
-    void push_helper(int[], int);
-    void print();
-};
 class table
 {
     string name;
     int how_many = 0;
-    record **records;
     int *types; // A list of types, 0 for int, 1 for string, 2 for timestamp. if 3 that's undefined
     btree *bjungle;
     void push_helper(int[], int);
@@ -41,21 +25,19 @@ table::table(string the_name, int fields, string fields_names[]) // Len of field
     field_count = fields;
     for(int i = 0; i < fields; i++)
     {
-        bjungle[i].set_name(fields_names[2 * i]);
         string type = fields_names[2 * i + 1];
         types[i] = (type == "int") ? 0 : (type == "string") ? 1 : (type == "timestamp") ? 2 : 3;
     }
-    records = new record*[field_count];
 
 }
-void table::push(int datas[])
-{
-    push_helper(datas, 0);
-}
-void table::push_helper(int datas[], int pos)
-{
-    bjungle->push(datas[pos]);
-}
+//void table::push(int datas[])
+//{
+//    push_helper(datas, 0);
+//}
+//void table::push_helper(int datas[], int pos)
+//{
+//    bjungle->push(datas[pos]);
+//}
 //void table::push(int datas[])
 //{
 //    records[how_many] = new record;

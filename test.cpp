@@ -11,24 +11,6 @@ int main()
         tree.push(datas[i]);
         tree.preorder_print();
     }
-    for(int i = 0; i < 11; i++)
-    {
-        cout << tree.do_we_have(datas[i]);
-    }
-    cout << "\n" << tree.do_we_have(100) << "\n";
-    cout << tree.puny() << "\n";
-    tree.del_val(5);
-    tree.preorder_print();
-    cout << tree.del_val(3) << endl;
-    tree.preorder_print();
-    cout << tree.del_val(6) << endl;
-    tree.preorder_print();
-    cout << tree.del_val(50) << endl;
-    tree.preorder_print();
-    tree.push(30);
-    tree.preorder_print();
-    tree.push(50);
-    tree.preorder_print();
 
 
 

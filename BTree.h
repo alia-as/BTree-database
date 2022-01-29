@@ -5,6 +5,7 @@
 using namespace std;
 bool debug_btree = true;
 const unsigned int max_degree = 4;
+class btree_node;
 class btree_node_section
 {
 public:
@@ -20,7 +21,7 @@ public:
     int how_many = 0;
     int which_child = -1;
     void print();
-    void shifting(int, int ending = max_degree - 1, bool);
+    void shifting(bool, int, int ending = max_degree - 1);
     btree_node();
 
 };
@@ -30,6 +31,8 @@ public:
     btree_node *root = 0;
     void push(int);
     void split(btree_node*);
+    void preorder_print();
+    void preorder_print_helper(btree_node*);
 
 };
 void btree::split(btree_node *node)
@@ -50,7 +53,7 @@ void btree::split(btree_node *node)
         }
         node->children[i + mid_ind + 1] = 0;
         right_child->nodes[i] = node->nodes[i + mid_ind + 1];
-        node->nodes[i + mid_ind + 1] = 0
+        node->nodes[i + mid_ind + 1] = 0;
     }
     right_child->children[max_degree - mid_ind - 1] = node->children[max_degree];
 
@@ -76,7 +79,7 @@ void btree::split(btree_node *node)
     }
     else
     {
-        node->parent->shifting(node->which_child, ,false);
+        node->parent->shifting(false, node->which_child);
         node->parent->nodes[node->which_child] = par_child;
         node->parent->children[node->which_child + 1] = right_child;
         node->parent->how_many++;
@@ -85,13 +88,23 @@ void btree::split(btree_node *node)
 }
 void btree::push(int val)
 {
+    if(debug_btree){printf("Going to put %d\n", val); }
     if(!root)
     {
         root = new btree_node;
     }
-    btree_node *temp = root;
     int i = 0;
     // Finding right place for that
+    if(root->how_many >= max_degree)
+    {
+        split(root);
+        if(debug_btree)
+        {
+            cout << "After splitting root: ";
+            preorder_print();
+        }
+    }
+    btree_node *temp = root;
     while(temp->children[0])
     {
         i = 0;
@@ -99,15 +112,43 @@ void btree::push(int val)
         {
             i++;
         }
-        if(temp->nodes[i])
+        if(debug_btree){printf("OK, i = %d\n", i); }
+        if(temp->children[i]->how_many >= max_degree)
+        {
+            split(temp->children[i]);
+            if(temp->nodes[i]->data > val)
+            {
+                temp = temp->children[i];
+            }
+            else
+            {
+                temp = temp->children[i + 1];
+            }
+        }
+        else
         {
             temp = temp->children[i];
         }
     }
+    if(debug_btree){cout << "We got to this leaf: "; temp->print();}
+    i = 0;
+    while(temp->nodes[i] && temp->nodes[i]->data < val)
+    {
+        i++;
+    }
+
+    if(debug_btree){printf("OK, i = %d\n", i); }
+    temp->shifting(false, i);
+    if(debug_btree){cout << "After shifting: "; temp->print();}
+    temp->nodes[i] = new btree_node_section;
+    temp->nodes[i]->data = val;
+    temp->nodes[i]->self = temp;
+    temp->how_many++;
+    if(debug_btree){cout << "After end: "; temp->print();}
 
 
 }
-void btree_node::shifting(int start, int ending, bool is_left)
+void btree_node::shifting(bool is_left, int start, int ending)
 {
     if(is_left) // index start will be replaced and ending will be deleted
     {
@@ -145,13 +186,14 @@ void btree_node::print()
     int i = 0;
     while(temp)
     {
-        cout << temp->data;
+        cout << temp->data << " ";
         i++;
         temp = nodes[i];
     }
+    printf(" & %d nodes & is the children no.%d\n", how_many, which_child);
     cout << "\n";
 }
-void btree_node::btree_node()
+btree_node::btree_node()
 {
     for(int i = 0; i < max_degree; i++)
     {
@@ -160,5 +202,19 @@ void btree_node::btree_node()
     }
     children[max_degree] = 0;
     parent = 0;
+}
+void btree::preorder_print()
+{
+    preorder_print_helper(root);
+}
+void btree::preorder_print_helper(btree_node *node)
+{
+    node->print();
+    int i = 0;
+    while(node->children[i])
+    {
+        preorder_print_helper(node->children[i]);
+        i++;
+    }
 }
 #endif // BTREE_H_INCLUDED
