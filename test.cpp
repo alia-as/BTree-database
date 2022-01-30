@@ -1,15 +1,30 @@
 #include "BTree.h"
 #include "table.h"
 #include <iostream>
+#include "hashing.h"
 using namespace std;
 int main()
 {
+    try
+    {
+        cout << timestamp2int("2020/3/44") << endl;
+    }
+    catch(string mess)
+    {
+        cout << mess;
+    }
     int datas[11] = {10, 1, 3, 2, 50, 6, 5, 5, 4, 7, 8};
     btree tree;
+    cout << tree.do_we_have(1) << "\n";
     for(int i = 0; i < 11; i++)
     {
         tree.push(datas[i]);
+        cout << tree.puny() << endl;
         tree.preorder_print();
+    }
+    for(int i = 0; i < 11; i++)
+    {
+        cout << tree.do_we_have(datas[i]);
     }
 
 

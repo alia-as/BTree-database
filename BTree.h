@@ -2,6 +2,7 @@
 #define BTREE_H_INCLUDED
 #include<iostream>
 #include<string>
+#include "vector.h"
 using namespace std;
 bool debug_btree = true;
 const unsigned int max_degree = 4;
@@ -29,12 +30,48 @@ class btree
 {
 public:
     btree_node *root = 0;
-    void push(int);
+    btree_node_section* push(int);
     void split(btree_node*);
     void preorder_print();
     void preorder_print_helper(btree_node*);
+    bool do_we_have(int);
+    int puny();
+    vec<btree_node_section*> equalsto(int, int&);
 
 };
+vec<btree_node_section*> btree::equalsto(int val, int&counts)
+{
+    vec<btree_node_section*> ans;
+    if(!root)
+    {
+        return ans;
+    }
+    btree_node *temp = root;
+    int i = 0;
+    while(true)
+    {
+        i = 0;
+        while(temp->nodes[i] && temp->nodes[i]->data < val)
+        {
+            i++;
+        }
+        if(temp->nodes[i] && temp->nodes[i]->data == val)
+        {
+
+        }
+        else
+        {
+            if(temp->children[i])
+            {
+                temp = temp->children[i];
+            }
+            else
+            {
+                return ans;
+            }
+        }
+    }
+}
 void btree::split(btree_node *node)
 {
     int mid_ind = max_degree / 2;
@@ -86,7 +123,7 @@ void btree::split(btree_node *node)
     }
 
 }
-void btree::push(int val)
+btree_node_section* btree::push(int val)
 {
     if(debug_btree){printf("Going to put %d\n", val); }
     if(!root)
@@ -98,11 +135,7 @@ void btree::push(int val)
     if(root->how_many >= max_degree)
     {
         split(root);
-        if(debug_btree)
-        {
-            cout << "After splitting root: ";
-            preorder_print();
-        }
+
     }
     btree_node *temp = root;
     while(temp->children[0])
@@ -112,7 +145,6 @@ void btree::push(int val)
         {
             i++;
         }
-        if(debug_btree){printf("OK, i = %d\n", i); }
         if(temp->children[i]->how_many >= max_degree)
         {
             split(temp->children[i]);
@@ -130,21 +162,18 @@ void btree::push(int val)
             temp = temp->children[i];
         }
     }
-    if(debug_btree){cout << "We got to this leaf: "; temp->print();}
     i = 0;
     while(temp->nodes[i] && temp->nodes[i]->data < val)
     {
         i++;
     }
 
-    if(debug_btree){printf("OK, i = %d\n", i); }
     temp->shifting(false, i);
-    if(debug_btree){cout << "After shifting: "; temp->print();}
     temp->nodes[i] = new btree_node_section;
     temp->nodes[i]->data = val;
     temp->nodes[i]->self = temp;
     temp->how_many++;
-    if(debug_btree){cout << "After end: "; temp->print();}
+    return temp->nodes[i];
 
 
 }
@@ -215,6 +244,53 @@ void btree::preorder_print_helper(btree_node *node)
     {
         preorder_print_helper(node->children[i]);
         i++;
+    }
+}
+bool btree::do_we_have(int val)
+{
+    if(!root)
+    {
+        return false;
+    }
+    btree_node *temp = root;
+    int i = 0;
+    while(true)
+    {
+        i = 0;
+        while(temp->nodes[i] && temp->nodes[i]->data < val)
+        {
+            i++;
+        }
+        if(temp->nodes[i] && temp->nodes[i]->data == val)
+        {
+            return true;
+        }
+        else
+        {
+            if(temp->children[i])
+            {
+                temp = temp->children[i];
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+}
+int btree::puny()
+{
+    int i = 1;
+    while(true)
+    {
+        if(do_we_have(i))
+        {
+            i++;
+        }
+        else
+        {
+            return i;
+        }
     }
 }
 #endif // BTREE_H_INCLUDED
