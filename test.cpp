@@ -13,31 +13,38 @@ int main()
     {
         cout << mess;
     }
-    int datas[11] = {10, 1, 3, 2, 50, 6, 5, 5, 4, 7, 8};
-    btree tree;
-    cout << tree.do_we_have(1) << "\n";
-    for(int i = 0; i < 11; i++)
-    {
-        tree.push(datas[i]);
-        cout << tree.puny() << endl;
-        tree.preorder_print();
-    }
-    for(int i = 0; i < 11; i++)
-    {
-        cout << tree.do_we_have(datas[i]);
-    }
-    cout << "\n------------------\n";
-    vec<btree_node_section*> woo = tree.morethan(45);
-    for(int i = 0; i < woo.len; i++)
-    {
-        cout << woo.inpos(i)->data << endl;
-    }
-    cout << "\n------------------\n";
-    woo = tree.lessthan(45);
-    for(int i = 0; i < woo.len; i++)
-    {
-        cout << woo.inpos(i)->data << endl;
-    }
+//    int datas[13] = {10, 1, 3, 2, 50, 6, 5, 5, 4, 7, 8};
+//    btree tree;
+//    cout << tree.do_we_have(1) << "\n";
+//    for(int i = 0; i < 13; i++)
+//    {
+//        tree.push(datas[i]);
+//        cout << tree.puny() << endl;
+//        tree.preorder_print();
+//    }
+//    for(int i = 0; i < 13; i++)
+//    {
+//        cout << tree.do_we_have(datas[i]);
+//    }
+//    cout << "\n------------------\n";
+//    vec<btree_node_section*> woo = tree.morethan(45);
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
+//    cout << "\n------------------\n";
+//    woo = tree.lessthan(45);
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
+//    cout << "\n------------------\n";
+//    woo = tree.equalsto(6);
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
+
 
 
 

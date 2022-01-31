@@ -45,6 +45,46 @@ public:
 
 
 };
+vec<btree_node_section*> btree::equalsto(int val)
+{
+    return equalsto_helper(val, root, 0);
+}
+vec<btree_node_section*> btree::equalsto_helper(int val, btree_node *node, int pos)
+{
+    vec<btree_node_section*> ans, temp;
+    while(node->nodes[pos] && node->nodes[pos]->data < val)
+    {
+        pos++;
+    }
+    if(node->nodes[pos])
+    {
+        if(node->nodes[pos]->data == val)
+        {
+            ans.pushback(node->nodes[pos]);
+            if(node->children[pos])
+            {
+                temp = equalsto_helper(val, node->children[pos], 0);
+                for(int i = 0; i < temp.len; i++)
+                {
+                    ans.pushback(temp.inpos(i));
+                }
+            }
+            if(node->children[pos + 1])
+            {
+                temp = equalsto_helper(val, node->children[pos + 1], 0);
+                for(int i = 0; i < temp.len; i++)
+                {
+                    ans.pushback(temp.inpos(i));
+                }
+            }
+        }
+        else if(node->children[pos])
+        {
+            return equalsto_helper(val, node->children[pos], 0);
+        }
+    }
+    return ans;
+}
 vec<btree_node_section*> btree::lessthan(int val)
 {
     return lessthan_helper(val, root, 0);
