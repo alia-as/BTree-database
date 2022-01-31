@@ -4,7 +4,7 @@
 #include<string>
 #include "vector.h"
 using namespace std;
-bool debug_btree = true;
+bool debug_btree = false;
 const unsigned int max_degree = 4;
 class btree_node;
 class btree_node_section
@@ -36,6 +36,7 @@ public:
     void preorder_print_helper(btree_node*);
     bool do_we_have(int);
     int puny();
+    vec<btree_node_section*> nodes_with_condition(int, string);
     vec<btree_node_section*> equalsto(int);
     vec<btree_node_section*> lessthan(int);
     vec<btree_node_section*> morethan(int);
@@ -45,6 +46,23 @@ public:
 
 
 };
+vec<btree_node_section*> btree::nodes_with_condition(int val, string sign)
+{
+    vec<btree_node_section*> ans;
+    if(sign == "<")
+    {
+        ans = lessthan(val);
+    }
+    else if(sign == "==")
+    {
+        ans = equalsto(val);
+    }
+    else if(sign == ">")
+    {
+        ans = morethan(val);
+    }
+    return ans;
+}
 vec<btree_node_section*> btree::equalsto(int val)
 {
     return equalsto_helper(val, root, 0);
@@ -64,18 +82,12 @@ vec<btree_node_section*> btree::equalsto_helper(int val, btree_node *node, int p
             if(node->children[pos])
             {
                 temp = equalsto_helper(val, node->children[pos], 0);
-                for(int i = 0; i < temp.len; i++)
-                {
-                    ans.pushback(temp.inpos(i));
-                }
+                ans.concat_with(temp);
             }
             if(node->children[pos + 1])
             {
                 temp = equalsto_helper(val, node->children[pos + 1], 0);
-                for(int i = 0; i < temp.len; i++)
-                {
-                    ans.pushback(temp.inpos(i));
-                }
+                ans.concat_with(temp);
             }
         }
         else if(node->children[pos])
@@ -98,10 +110,7 @@ vec<btree_node_section*> btree::lessthan_helper(int val, btree_node *node, int p
         if(node->children[pos])
         {
             temp = lessthan_helper(val, node->children[pos], 0);
-            for(int i = 0; i < temp.len; i++)
-            {
-                ans.pushback(temp.inpos(i));
-            }
+            ans.concat_with(temp);
         }
         pos++;
 
@@ -109,19 +118,13 @@ vec<btree_node_section*> btree::lessthan_helper(int val, btree_node *node, int p
     if(!node->nodes[pos] && node->children[pos])
     {
         temp = lessthan_helper(val, node->children[pos], 0);
-        for(int i = 0; i < temp.len; i++)
-        {
-            ans.pushback(temp.inpos(i));
-        }
+        ans.concat_with(temp);
 
     }
     if(node->nodes[pos] && node->nodes[pos]->data >= val && node->children[pos])
     {
         temp = lessthan_helper(val, node->children[pos], 0);
-        for(int i = 0; i < temp.len; i++)
-        {
-            ans.pushback(temp.inpos(i));
-        }
+        ans.concat_with(temp);
 
     }
 
@@ -133,13 +136,13 @@ vec<btree_node_section*> btree::morethan(int val)
 }
 vec<btree_node_section*> btree::morethan_helper(int val, btree_node *node, int pos)
 {
-    if(node->nodes[pos] && node->nodes[pos]->data <= val)
+    vec<btree_node_section*> ans;
+    while(node->nodes[pos] && node->nodes[pos]->data <= val)
     {
-        return morethan_helper(val, node, pos + 1);
+        pos++;
     }
-    else if(node->nodes[pos])
+    if(node->nodes[pos])
     {
-        vec<btree_node_section*> ans;
         for(int i = pos; i < node->how_many; i++)
         {
             ans.pushback(node->nodes[i]);
@@ -149,18 +152,16 @@ vec<btree_node_section*> btree::morethan_helper(int val, btree_node *node, int p
             if(node->children[i])
             {
                 vec<btree_node_section*> temp = morethan_helper(val, node->children[i], 0);
-                for(int q = 0; q < temp.len; q++)
-                {
-                    ans.pushback(temp.inpos(q));
-                }
+                ans.concat_with(temp);
+
             }
         }
-        return ans;
     }
-    else
+    else if(node->children[node->how_many])
     {
         return morethan_helper(val, node->children[node->how_many], 0);
     }
+    return ans;
 }
 void btree::split(btree_node *node)
 {

@@ -2,12 +2,13 @@
 #include "table.h"
 #include "hashing.h"
 using namespace std;
-int query_analizer(string);
-bool debug_database = true;
+void query_analizer(string);
+bool debug_database = false;
 string *tokenize(string, int&);
 bool is_letter(int);
 table **tables = new table*[1];
 int table_count = 0, table_size = 1;
+table *find_table(string);
 int main()
 {
     string query = "";
@@ -16,10 +17,17 @@ int main()
     {
         getline(cin, query);
         c = 0;
-        query_analizer(query);
+        try
+        {
+            query_analizer(query);
+        }
+        catch(char const* msg)
+        {
+            cout << msg;
+        }
     }
 }
-int query_analizer(string query)
+void query_analizer(string query)
 {
     int counts = 0;
     string* query_tokens = tokenize(query, counts);
@@ -39,8 +47,8 @@ int query_analizer(string query)
         {
             if(tables[i]->name == table_name)
             {
-                cout << "Table already exist!\n";
-                return 1;
+                throw ("Table already exist!\n");
+
             }
         }
         int fc = ((counts - 5) + 1) / 3, controller = 0;
@@ -75,18 +83,15 @@ int query_analizer(string query)
     else if(command == "INSERT")
     {
         string table_name = query_tokens[2];
-        table *right_one = 0;
-        for(int i = 0; i < table_count; i++)
+        table *right_one;
+        try
         {
-            if(tables[i]->name == table_name)
-            {
-                right_one = tables[i];
-            }
+            right_one = find_table(table_name);
         }
-        if(!right_one)
+        catch(char const* msg)
         {
-            cout << "Table does not exist!\n";
-            return 2;
+            cout << msg;
+            return;
         }
         int datas[right_one->field_count - 1], ind = 0;
         for(int i = 5; ind < right_one->field_count - 1; i += 2)
@@ -122,11 +127,74 @@ int query_analizer(string query)
     }
     else if(command == "UPDATE")
     {
-        cout << 3 << endl;
+        table * t = find_table(query_tokens[1]);
+        string fields[t->field_count - 1];
+        int index = 0, pos = 4;
+        for(pos = 4; index < t->field_count - 1; pos += 2)
+        {
+            fields[index] = query_tokens[pos];
+            index++;
+        }
+        t->update(query_tokens[pos + 1], query_tokens[pos + 2],
+                  query_tokens[pos + 3], fields);
+
     }
     else if(command == "SELECT")
     {
-        cout << 4 << endl;
+        int how_many = 0;
+        if(query_tokens[1] == "*")
+        {
+            string q[0];
+            table* t = 0;
+            try
+            {
+                t = find_table(query_tokens[3]);
+            }
+            catch(char const* msg)
+            {
+                cout << "Oh, no!\n";
+                throw(msg);
+            }
+            t->print_with_conditions(query_tokens[5], query_tokens[6],
+                                    query_tokens[7], q, t->field_count);
+
+        }
+        else
+        {
+            int pos = 2, index = 0;
+            while(query_tokens[pos] != ")")
+            {
+                pos++;
+            }
+            int needed_fields = (pos - 1) / 2;
+            string fields[needed_fields];
+            pos = 2;
+            while(query_tokens[pos] != ")")
+            {
+                if(query_tokens[pos] == ",")
+                {
+                    index++;
+                }
+                else
+                {
+                    fields[index] = query_tokens[pos];
+                }
+                pos++;
+            }
+            table* t = 0;
+            try
+            {
+                t = find_table(query_tokens[pos + 2]);
+            }
+            catch(char const* msg)
+            {
+                cout << msg;
+                return;
+            }
+            t->print_with_conditions(query_tokens[pos + 4], query_tokens[pos + 5],
+                                    query_tokens[pos + 6], fields, needed_fields);
+
+        }
     }
     else if(command == "DELETE")
     {
@@ -272,6 +340,25 @@ string *tokenize(string text, int &counts)
     word = "";
     counts++;
     return ans;
+}
+table *find_table(string table_name)
+{
+    table *right_one = 0;
+    for(int i = 0; i < table_count; i++)
+    {
+        if(tables[i]->name == table_name)
+        {
+            right_one = tables[i];
+        }
+    }
+    if(!right_one)
+    {
+        throw ("Table does not exist!\n");
+    }
+    else
+    {
+        return right_one;
+    }
 }
 bool is_letter(int n)
 {

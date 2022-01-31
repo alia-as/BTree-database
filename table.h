@@ -4,22 +4,120 @@
 #include "BTree.h"
 #include "hashing.h"
 using namespace std;
-bool debug_table = true;
+bool debug_table = false;
 class table
 {
     public:
     string name;
-    int how_many = 0;
     int *types; // A list of types, 0 for int, 1 for string, 2 for timestamp. if 3 that's undefined
     string *tree_names;
     btree *bjungle;
     unsigned int field_count;
     table(string, int, string[]);
     void push(int[]);
-    void find_where(string*, int, string, string, int);
+    vec<btree_node_section*> nodes_with_condition(string, string, string);
+    void print_with_conditions(string, string, string, string[], int);
+    void update(string, string, string, string[]);
+
 
 };
-void table::find_where(string *fields, int how_many, string which, string val, int sign)
+void table::update(string which, string sign, string val, string fields[])
+{
+    int datas[field_count - 1];
+    for(int w = 0; w < field_count - 1; w++)
+    {
+        if(types[w + 1] == 0)
+        {
+            datas[w] = sint2int(fields[w]);
+        }
+        else if(types[w + 1] == 1)
+        {
+            datas[w] = 123;
+        }
+        else if(types[w + 1] == 2)
+        {
+            datas[w] = timestamp2int(fields[w]);
+        }
+    }
+    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
+    for(int i = 0; i < nodes.len; i++)
+    {
+        btree_node_section* now = nodes.inpos(i);
+        now = now->nextField;
+        for(int q = 0; q < field_count - 1; q++)
+        {
+            now->data = datas[q];
+            now = now->nextField;
+        }
+    }
+}
+void table::print_with_conditions(string which, string sign, string val, string fields[], int counts)
+{
+    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
+    if(debug_table)
+    {
+        nodes.print();
+
+    }
+    bool needed[field_count];
+    if(counts == field_count)
+    {
+        for(int i = 0; i < field_count; i++)
+        {
+            needed[i] = true;
+        }
+    }
+    else
+    {
+        for(int q = 0; q < field_count; q++)
+        {
+            needed[q] = false;
+            for(int w = 0; w < counts; w++)
+            {
+                if(tree_names[q] == fields[w])
+                {
+                    needed[q] = true;
+                    break;
+                }
+            }
+        }
+    }
+    if(debug_table)
+    {
+        cout << "Needing: ";
+        for(int e = 0; e < field_count; e++)
+        {
+            cout << needed[e];
+        }
+        cout << "\n";
+    }
+    for(int r = 0; r < nodes.len; r++)
+    {
+        btree_node_section *now = nodes.inpos(r);
+        for(int pos = 0; pos < field_count; pos++)
+        {
+            if(needed[pos])
+            {
+                if(types[pos] == 0)
+                {
+                    cout << now->data << " ";
+                }
+                else if(types[pos] == 1)
+                {
+                    cout << "string ";
+                }
+                else if(types[pos] == 2)
+                {
+                    cout << int2timestamp(now->data) << " ";
+                }
+
+            }
+            now = now->nextField;
+        }
+        cout << "\n";
+    }
+}
+vec<btree_node_section*> table::nodes_with_condition(string which, string sign, string val)
 {
     int i;
     for(i = 0; i < field_count; i++)
@@ -29,6 +127,7 @@ void table::find_where(string *fields, int how_many, string which, string val, i
             break;
         }
     }
+    // Now i is the tree which we set rules to that
     // find int of given value
     int valint;
     if(types[i] == 0)
@@ -44,6 +143,25 @@ void table::find_where(string *fields, int how_many, string which, string val, i
         valint = timestamp2int(val);
     }
     btree tree = bjungle[i];
+    vec<btree_node_section*> ans, that_tree_nodes = tree.nodes_with_condition(valint, sign);
+    for(int q = 0; q < that_tree_nodes.len; q++)
+    {
+        btree_node_section* t = that_tree_nodes.inpos(q);
+
+    }
+
+    for(int q = 0; q < that_tree_nodes.len; q++)
+    {
+        btree_node_section* t = that_tree_nodes.inpos(q);
+        for(int w = 0; w < field_count - i; w++)
+        {
+            t = t->nextField;
+
+        }
+        ans.pushback(t);
+
+    }
+    return ans;
 
 
 }
