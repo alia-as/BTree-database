@@ -26,6 +26,18 @@ int main()
     {
         cout << tree.do_we_have(datas[i]);
     }
+    cout << "\n------------------\n";
+    vec<btree_node_section*> woo = tree.morethan(45);
+    for(int i = 0; i < woo.len; i++)
+    {
+        cout << woo.inpos(i)->data << endl;
+    }
+    cout << "\n------------------\n";
+    woo = tree.lessthan(45);
+    for(int i = 0; i < woo.len; i++)
+    {
+        cout << woo.inpos(i)->data << endl;
+    }
 
 
 

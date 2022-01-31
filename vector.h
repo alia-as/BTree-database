@@ -35,8 +35,8 @@ public:
     type finish();
     type inpos(int);
     void swapnodes(int,int);
-private:
     int len;
+private:
     vec_node<type> *current_pos;
     void printhelper(vec_node<type>*);
     void pushbackhelper(type ,vec_node<type>*, vec_node<type>*&);

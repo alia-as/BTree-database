@@ -36,40 +36,90 @@ public:
     void preorder_print_helper(btree_node*);
     bool do_we_have(int);
     int puny();
-    vec<btree_node_section*> equalsto(int, int&);
+    vec<btree_node_section*> equalsto(int);
+    vec<btree_node_section*> lessthan(int);
+    vec<btree_node_section*> morethan(int);
+    vec<btree_node_section*> equalsto_helper(int, btree_node*, int);
+    vec<btree_node_section*> lessthan_helper(int, btree_node*, int);
+    vec<btree_node_section*> morethan_helper(int, btree_node*, int);
+
 
 };
-vec<btree_node_section*> btree::equalsto(int val, int&counts)
+vec<btree_node_section*> btree::lessthan(int val)
 {
-    vec<btree_node_section*> ans;
-    if(!root)
+    return lessthan_helper(val, root, 0);
+}
+vec<btree_node_section*> btree::lessthan_helper(int val, btree_node *node, int pos)
+{
+    vec<btree_node_section*> ans, temp;
+    while(node->nodes[pos] && node->nodes[pos]->data < val)
     {
+        ans.pushback(node->nodes[pos]);
+        if(node->children[pos])
+        {
+            temp = lessthan_helper(val, node->children[pos], 0);
+            for(int i = 0; i < temp.len; i++)
+            {
+                ans.pushback(temp.inpos(i));
+            }
+        }
+        pos++;
+
+    }
+    if(!node->nodes[pos] && node->children[pos])
+    {
+        temp = lessthan_helper(val, node->children[pos], 0);
+        for(int i = 0; i < temp.len; i++)
+        {
+            ans.pushback(temp.inpos(i));
+        }
+
+    }
+    if(node->nodes[pos] && node->nodes[pos]->data >= val && node->children[pos])
+    {
+        temp = lessthan_helper(val, node->children[pos], 0);
+        for(int i = 0; i < temp.len; i++)
+        {
+            ans.pushback(temp.inpos(i));
+        }
+
+    }
+
+    return ans;
+}
+vec<btree_node_section*> btree::morethan(int val)
+{
+    return morethan_helper(val, root, 0);
+}
+vec<btree_node_section*> btree::morethan_helper(int val, btree_node *node, int pos)
+{
+    if(node->nodes[pos] && node->nodes[pos]->data <= val)
+    {
+        return morethan_helper(val, node, pos + 1);
+    }
+    else if(node->nodes[pos])
+    {
+        vec<btree_node_section*> ans;
+        for(int i = pos; i < node->how_many; i++)
+        {
+            ans.pushback(node->nodes[i]);
+        }
+        for(int i = pos; i < node->how_many + 1; i++)
+        {
+            if(node->children[i])
+            {
+                vec<btree_node_section*> temp = morethan_helper(val, node->children[i], 0);
+                for(int q = 0; q < temp.len; q++)
+                {
+                    ans.pushback(temp.inpos(q));
+                }
+            }
+        }
         return ans;
     }
-    btree_node *temp = root;
-    int i = 0;
-    while(true)
+    else
     {
-        i = 0;
-        while(temp->nodes[i] && temp->nodes[i]->data < val)
-        {
-            i++;
-        }
-        if(temp->nodes[i] && temp->nodes[i]->data == val)
-        {
-
-        }
-        else
-        {
-            if(temp->children[i])
-            {
-                temp = temp->children[i];
-            }
-            else
-            {
-                return ans;
-            }
-        }
+        return morethan_helper(val, node->children[node->how_many], 0);
     }
 }
 void btree::split(btree_node *node)
