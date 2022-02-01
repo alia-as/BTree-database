@@ -2,40 +2,56 @@
 #include "table.h"
 #include <iostream>
 #include "hashing.h"
+#include "vector.h"
+#include "query_analizer.h"
 using namespace std;
 int main()
 {
-    int datas[5] = {55000, 20000, 70000, 40000, 67000};
-    btree tree;
-    cout << tree.do_we_have(1) << "\n";
-    for(int i = 0; i < 5; i++)
-    {
-        tree.push(datas[i]);
-        cout << tree.puny() << endl;
-        tree.preorder_print();
-    }
-    for(int i = 0; i < 5; i++)
-    {
-        cout << tree.do_we_have(datas[i]);
-    }
-    cout << "\n------------------\n";
-    vec<btree_node_section*> woo = tree.nodes_with_condition(45000, "<");
-    for(int i = 0; i < woo.len; i++)
-    {
-        cout << woo.inpos(i)->data << endl;
-    }
-    cout << "\n------------------\n";
-    woo = tree.nodes_with_condition(45000, ">");
-    for(int i = 0; i < woo.len; i++)
-    {
-        cout << woo.inpos(i)->data << endl;
-    }
-    cout << "\n------------------\n";
-    woo = tree.nodes_with_condition(45000, "==");
-    for(int i = 0; i < woo.len; i++)
-    {
-        cout << woo.inpos(i)->data << endl;
-    }
+
+//    while(true)
+//    {
+//        string query;
+//        getline(cin, query);
+//        string name = query;
+//        int woow = string2int(name);
+//        cout << "woow = " << woow << "\n";
+//        cout << int2string(woow) << "\n";
+//    }
+
+//    const int a = 8;
+//    int datas[a] = {55000, 20000, 70000, 40000, 67000, 35000, 25000, 45000};
+//    btree tree;
+//    cout << tree.do_we_have(1) << "\n";
+//    for(int i = 0; i < a; i++)
+//    {
+//        tree.push(datas[i]);
+//        cout << tree.puny() << endl;
+//        tree.preorder_print();
+//    }
+//    tree.del(20000);
+//    tree.preorder_print();
+//    for(int i = 0; i < a; i++)
+//    {
+//        cout << tree.do_we_have(datas[i]);
+//    }
+//    cout << "\n------------------\n";
+//    vec<btree_node_section*> woo = tree.nodes_with_condition(45000, "<");
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
+//    cout << "\n------------------\n";
+//    woo = tree.nodes_with_condition(45000, ">");
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
+//    cout << "\n------------------\n";
+//    woo = tree.nodes_with_condition(45000, "==");
+//    for(int i = 0; i < woo.len; i++)
+//    {
+//        cout << woo.inpos(i)->data << endl;
+//    }
 
 
 

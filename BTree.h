@@ -10,7 +10,7 @@ class btree_node;
 class btree_node_section
 {
 public:
-    int data = 0;
+    long long data = 0;
     btree_node_section *nextField = 0;
     btree_node *self = 0;
 };
@@ -30,23 +30,154 @@ class btree
 {
 public:
     btree_node *root = 0;
-    btree_node_section* push(int);
+    btree_node_section* push(long long);
+    void del(long long);
     void split(btree_node*);
     void preorder_print();
     void preorder_print_helper(btree_node*);
-    bool do_we_have(int);
+    bool do_we_have(long long);
     int puny();
-    vec<btree_node_section*> nodes_with_condition(int, string);
-    vec<btree_node_section*> equalsto(int);
-    vec<btree_node_section*> lessthan(int);
-    vec<btree_node_section*> morethan(int);
-    vec<btree_node_section*> equalsto_helper(int, btree_node*, int);
-    vec<btree_node_section*> lessthan_helper(int, btree_node*, int);
-    vec<btree_node_section*> morethan_helper(int, btree_node*, int);
+    vec<btree_node_section*> nodes_with_condition(long long, string);
+    vec<btree_node_section*> equalsto(long long);
+    vec<btree_node_section*> lessthan(long long);
+    vec<btree_node_section*> morethan(long long);
+    vec<btree_node_section*> equalsto_helper(long long, btree_node*, int);
+    vec<btree_node_section*> lessthan_helper(long long, btree_node*, int);
+    vec<btree_node_section*> morethan_helper(long long, btree_node*, int);
 
 
 };
-vec<btree_node_section*> btree::nodes_with_condition(int val, string sign)
+void btree::del(long long item)
+{
+    if(!root)
+    {
+        return;
+    }
+    btree_node *temp = root;
+    int i = 0;
+    while(true)
+    {
+        i = 0;
+        while(temp->nodes[i] && temp->nodes[i]->data < item)
+        {
+            i++;
+        }
+        if(temp->nodes[i] && temp->nodes[i]->data == item)
+        {
+            break;
+        }
+        else
+        {
+            if(temp->children[i])
+            {
+                temp = temp->children[i];
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+    // Now we find that item, it is in temp at position i
+    if(temp->children[i]) // If it is not a leaf change it by its predecessor
+    {
+        btree_node *prefinder = temp->children[i];
+        while(prefinder->children[prefinder->how_many])
+        {
+            prefinder = prefinder->children[prefinder->how_many];
+        }
+        btree_node_section *predecessor = prefinder->nodes[prefinder->how_many - 1];
+        prefinder->nodes[prefinder->how_many - 1] = temp->nodes[i];
+        temp->nodes[i] = predecessor;
+        temp = prefinder;
+        i = temp->how_many - 1;
+    }
+    // Now temp is a leaf
+    temp->shifting(true, i);
+    if(temp->how_many > max_degree / 2 || temp == root) // easy deletion
+    {
+        temp->how_many--;
+        return;
+    }
+    else
+    {
+        btree_node *rs = (temp->which_child < temp->parent->how_many) ? temp->parent->children[temp->which_child + 1] : 0; // Right sibling
+        btree_node *ls = (temp->which_child > 0) ? temp->parent->children[temp->which_child - 1] : 0; // Left sibling
+        if(ls && ls->how_many > max_degree / 2)
+        {
+            temp->shifting(false, 0);
+            temp->nodes[0] = temp->parent->nodes[temp->which_child - 1];
+            temp->parent->nodes[temp->which_child - 1] = ls->nodes[ls->how_many - 1];
+            ls->nodes[ls->how_many - 1] = 0;
+            ls->how_many--;
+
+        }
+        else if(rs && rs->how_many > max_degree / 2)
+        {
+            temp->nodes[temp->how_many - 1] = temp->parent->nodes[temp->which_child];
+            temp->parent->nodes[temp->which_child] = rs->nodes[0];
+            rs->shifting(true, 0);
+            rs->how_many--;
+
+        }
+        else // We have to merge temp
+        {
+            if(ls)
+            {
+                ls->nodes[ls->how_many] = ls->parent->nodes[ls->which_child];
+                ls->how_many++;
+                for(int q = 0; q < temp->how_many - 1; q++)
+                {
+                    ls->nodes[ls->how_many] = temp->nodes[q];
+                    ls->how_many++;
+
+                }
+                ls->parent->shifting(true, ls->which_child);
+                ls->parent->how_many--;
+                if(ls->parent->how_many == 0)
+                {
+                    if(ls->parent == root)
+                    {
+                        root = ls;
+                    }
+                    else
+                    {
+                        ls->parent->parent->children[ls->parent->which_child] = ls;
+                        ls->which_child = ls->parent->which_child;
+                    }
+                }
+
+            }
+            else if(rs)
+            {
+                temp->nodes[temp->how_many - 1] = temp->parent->nodes[temp->which_child];
+                for(int q = 0; q < rs->how_many; q++)
+                {
+                    temp->nodes[temp->how_many] = rs->nodes[q];
+                    temp->how_many++;
+                }
+                temp->parent->shifting(true, temp->which_child);
+                temp->parent->how_many--;
+                if(temp->parent->how_many == 0)
+                {
+                    if(temp->parent == root)
+                    {
+                        root = temp;
+                    }
+                    else
+                    {
+                        temp->parent->parent->children[temp->parent->which_child] = temp;
+                        temp->which_child = temp->parent->which_child;
+                    }
+                }
+
+            }
+        }
+
+    }
+
+}
+vec<btree_node_section*> btree::nodes_with_condition(long long val, string sign)
 {
     vec<btree_node_section*> ans;
     if(sign == "<")
@@ -63,11 +194,11 @@ vec<btree_node_section*> btree::nodes_with_condition(int val, string sign)
     }
     return ans;
 }
-vec<btree_node_section*> btree::equalsto(int val)
+vec<btree_node_section*> btree::equalsto(long long val)
 {
     return equalsto_helper(val, root, 0);
 }
-vec<btree_node_section*> btree::equalsto_helper(int val, btree_node *node, int pos)
+vec<btree_node_section*> btree::equalsto_helper(long long val, btree_node *node, int pos)
 {
     vec<btree_node_section*> ans, temp;
     while(node->nodes[pos] && node->nodes[pos]->data < val)
@@ -97,11 +228,11 @@ vec<btree_node_section*> btree::equalsto_helper(int val, btree_node *node, int p
     }
     return ans;
 }
-vec<btree_node_section*> btree::lessthan(int val)
+vec<btree_node_section*> btree::lessthan(long long val)
 {
     return lessthan_helper(val, root, 0);
 }
-vec<btree_node_section*> btree::lessthan_helper(int val, btree_node *node, int pos)
+vec<btree_node_section*> btree::lessthan_helper(long long val, btree_node *node, int pos)
 {
     vec<btree_node_section*> ans, temp;
     while(node->nodes[pos] && node->nodes[pos]->data < val)
@@ -130,11 +261,11 @@ vec<btree_node_section*> btree::lessthan_helper(int val, btree_node *node, int p
 
     return ans;
 }
-vec<btree_node_section*> btree::morethan(int val)
+vec<btree_node_section*> btree::morethan(long long val)
 {
     return morethan_helper(val, root, 0);
 }
-vec<btree_node_section*> btree::morethan_helper(int val, btree_node *node, int pos)
+vec<btree_node_section*> btree::morethan_helper(long long val, btree_node *node, int pos)
 {
     vec<btree_node_section*> ans;
     while(node->nodes[pos] && node->nodes[pos]->data <= val)
@@ -145,6 +276,10 @@ vec<btree_node_section*> btree::morethan_helper(int val, btree_node *node, int p
     {
         for(int i = pos; i < node->how_many; i++)
         {
+            if(node->nodes[i] == 0)
+            {
+                cout << "It is 0 in pos " << i << " ";node->print();
+            }
             ans.pushback(node->nodes[i]);
         }
         for(int i = pos; i < node->how_many + 1; i++)
@@ -214,7 +349,7 @@ void btree::split(btree_node *node)
     }
 
 }
-btree_node_section* btree::push(int val)
+btree_node_section* btree::push(long long val)
 {
     if(debug_btree){printf("Going to put %d\n", val); }
     if(!root)
@@ -337,7 +472,7 @@ void btree::preorder_print_helper(btree_node *node)
         i++;
     }
 }
-bool btree::do_we_have(int val)
+bool btree::do_we_have(long long val)
 {
     if(!root)
     {

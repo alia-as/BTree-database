@@ -14,16 +14,30 @@ class table
     btree *bjungle;
     unsigned int field_count;
     table(string, int, string[]);
-    void push(int[]);
+    void push(long long[]);
     vec<btree_node_section*> nodes_with_condition(string, string, string);
     void print_with_conditions(string, string, string, string[], int);
     void update(string, string, string, string[]);
+    void deleteee(string, string, string);
 
 
 };
+void table::deleteee(string which, string sign, string val)
+{
+    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
+    for(int q = 0; q < nodes.len; q++)
+    {
+        btree_node_section *now = nodes.inpos(q);
+        for(int w = 0; w < field_count; w++)
+        {
+            bjungle[w].del(now->data);
+            now = now->nextField;
+        }
+    }
+}
 void table::update(string which, string sign, string val, string fields[])
 {
-    int datas[field_count - 1];
+    long long datas[field_count - 1];
     for(int w = 0; w < field_count - 1; w++)
     {
         if(types[w + 1] == 0)
@@ -32,7 +46,7 @@ void table::update(string which, string sign, string val, string fields[])
         }
         else if(types[w + 1] == 1)
         {
-            datas[w] = 123;
+            datas[w] = string2int(fields[w]);
         }
         else if(types[w + 1] == 2)
         {
@@ -104,7 +118,7 @@ void table::print_with_conditions(string which, string sign, string val, string 
                 }
                 else if(types[pos] == 1)
                 {
-                    cout << "string ";
+                    cout << int2string(now->data) << " ";
                 }
                 else if(types[pos] == 2)
                 {
@@ -129,14 +143,14 @@ vec<btree_node_section*> table::nodes_with_condition(string which, string sign, 
     }
     // Now i is the tree which we set rules to that
     // find int of given value
-    int valint;
+    long long valint;
     if(types[i] == 0)
     {
         valint = sint2int(val);
     }
     else if(types[i] == 1)
     {
-        valint = 123;
+        valint = string2int(val);
     }
     else if(types[i] == 2)
     {
@@ -158,7 +172,7 @@ vec<btree_node_section*> table::nodes_with_condition(string which, string sign, 
             t = t->nextField;
 
         }
-        ans.pushback(t);
+        ans.sorted_pushback(t);
 
     }
     return ans;
@@ -180,14 +194,17 @@ table::table(string the_name, int fields, string fields_names[]) // Len of field
         types[i + 1] = (type == "int") ? 0 : (type == "string") ? 1 : (type == "timestamp") ? 2 : 3;
         tree_names[i + 1] = fields_names[2 * i];
     }
-    cout << "Table " << name << " created!\n";
-    for(int i = 0; i < field_count; i++)
+    if(debug_table)
     {
-        cout << tree_names[i] << ": " << types[i] << "\n";
+        cout << "Table " << name << " created!\n";
+        for(int i = 0; i < field_count; i++)
+        {
+            cout << tree_names[i] << ": " << types[i] << "\n";
+        }
     }
 
 }
-void table::push(int datas[])
+void table::push(long long datas[])
 {
     int first_id = bjungle[0].puny();
     if(debug_table)

@@ -1,3 +1,5 @@
+#ifndef VECTOR_H_INCLUDED
+#define VECTOR_H_INCLUDED
 #include<iostream>
 using namespace std;
 template<typename type>
@@ -12,6 +14,7 @@ class vec
 {
 public:
     void pushback(type);
+    void sorted_pushback(type);
     type inpos(int);
     int len = 0;
     void print();
@@ -22,6 +25,46 @@ private:
     vec_node<type> *nodeinpos(int);
 
 };
+template<typename type>
+void vec<type>::sorted_pushback(type val)
+{
+    if(!first)
+    {
+        first = new vec_node<type>;
+        first->value = val;
+        last_pos = first;
+        len++;
+        return;
+    }
+    else if(first->value->data >= val->data)
+    {
+        vec_node<type> *newfirst = new vec_node<type>;
+        newfirst->value = val;
+        newfirst->right_node = first;
+        first = newfirst;
+        len++;
+        return;
+    }
+    vec_node<type> *temp = first;
+    while(temp->right_node && temp->right_node->value->data < val->data)
+    {
+        temp = temp->right_node;
+    }
+    if(temp->right_node)
+    {
+        vec_node<type>* ins = new vec_node<type>;
+        ins->value = val;
+        ins->right_node = temp->right_node;
+        temp->right_node = ins;
+    }
+    else
+    {
+        temp->right_node = new vec_node<type>;
+        temp->right_node->value = val;
+        last_pos = temp->right_node;
+    }
+    len++;
+}
 template<typename type>
 void vec<type>::concat_with(vec<type> another)
 {
@@ -93,3 +136,7 @@ type vec<type>::inpos(int pos)
     }
 }
 
+
+
+
+#endif // VECTOR_H_INCLUDED

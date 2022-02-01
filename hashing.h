@@ -79,4 +79,47 @@ string int2timestamp(int date)
 
 
 }
+long long string2int(string name)
+{
+    long long ans = 0, temp;
+    name = name.substr(1, name.size() - 2);
+    for(int i = 0; i < name.size(); i++)
+    {
+        temp = (int)name[i];
+        if(temp >= 48 && temp <= 57)
+        {
+            temp -= 48;
+        }
+        else if(temp >= 97 && temp <= 122)
+        {
+            temp -= 87;
+        }
+        else
+        {
+            throw("String has unusual characters!!\n");
+        }
+        ans *= 36;
+        ans += temp;
+    }
+    return ans;
+}
+string int2string(long long num)
+{
+    string name = "";
+    char temp;
+    while(num > 0)
+    {
+        if(num % 36 < 10)
+        {
+            temp = (num % 36 + 48);
+        }
+        else
+        {
+            temp = (num % 36 + 87);
+        }
+        name = temp + name;
+        num /= 36;
+    }
+    return name;
+}
 #endif // HASHING_H_INCLUDED
