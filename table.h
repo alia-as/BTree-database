@@ -16,15 +16,24 @@ class table
     table(string, int, string[]);
     void push(long long[]);
     vec<btree_node_section*> nodes_with_condition(string, string, string);
-    void print_with_conditions(string, string, string, string[], int);
-    void update(string, string, string, string[]);
-    void deleteee(string, string, string);
+    vec<btree_node_section*> nodes_with_2condition(string[], string);
+    void print_with_conditions(string[], string*, int, string sign = "");
+    void update(string[], string[], string sign = "");
+    void deleteee(string[], string sign = "");
 
 
 };
-void table::deleteee(string which, string sign, string val)
+void table::deleteee(string conditions[], string sign)
 {
-    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
+    vec<btree_node_section*> nodes;
+    if(sign == "")
+    {
+        nodes = nodes_with_condition(conditions[0], conditions[1], conditions[2]);
+    }
+    else
+    {
+        nodes = nodes_with_2condition(conditions, sign);
+    }
     for(int q = 0; q < nodes.len; q++)
     {
         btree_node_section *now = nodes.inpos(q);
@@ -35,7 +44,7 @@ void table::deleteee(string which, string sign, string val)
         }
     }
 }
-void table::update(string which, string sign, string val, string fields[])
+void table::update(string conditions[], string fields[], string sign)
 {
     long long datas[field_count - 1];
     for(int w = 0; w < field_count - 1; w++)
@@ -53,7 +62,15 @@ void table::update(string which, string sign, string val, string fields[])
             datas[w] = timestamp2int(fields[w]);
         }
     }
-    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
+    vec<btree_node_section*> nodes;
+    if(sign == "")
+    {
+        nodes = nodes_with_condition(conditions[0], conditions[1], conditions[2]);
+    }
+    else
+    {
+        nodes = nodes_with_2condition(conditions, sign);
+    }
     for(int i = 0; i < nodes.len; i++)
     {
         btree_node_section* now = nodes.inpos(i);
@@ -65,12 +82,17 @@ void table::update(string which, string sign, string val, string fields[])
         }
     }
 }
-void table::print_with_conditions(string which, string sign, string val, string fields[], int counts)
+void table::print_with_conditions(string conditions[], string *fields, int counts, string sign)
 {
-    vec<btree_node_section*> nodes = nodes_with_condition(which, sign, val);
-    if(debug_table)
+    vec<btree_node_section*> nodes;
+    if(sign == "")
     {
-        nodes.print();
+        nodes = nodes_with_condition(conditions[0], conditions[1], conditions[2]);
+
+    }
+    else
+    {
+        nodes = nodes_with_2condition(conditions, sign);
 
     }
     bool needed[field_count];
@@ -130,6 +152,48 @@ void table::print_with_conditions(string which, string sign, string val, string 
         }
         cout << "\n";
     }
+}
+vec<btree_node_section*> table::nodes_with_2condition(string conditions[], string andor)
+{
+    vec<btree_node_section*> first = nodes_with_condition(conditions[0], conditions[1], conditions[2]);
+    vec<btree_node_section*> second = nodes_with_condition(conditions[3], conditions[4], conditions[5]);
+    if(debug_table)
+    {
+        cout << "first: ";first.print();
+        cout << "and Second= ";second.print();
+        cout << endl;
+    }
+    vec<btree_node_section*> ans;
+    int a = 0, b = 0;
+    while(a < first.len || b < second.len)
+    {
+            while(a < first.len && (b >= second.len || first.inpos(a)->data < second.inpos(b)->data))
+            {
+                if(andor == "|")
+                {
+                    ans.pushback(first.inpos(a));
+
+                }
+                a++;
+            }
+            while(b < second.len && (a >= first.len || first.inpos(a)->data > second.inpos(b)->data))
+            {
+                if(andor == "|")
+                {
+                    ans.pushback(second.inpos(b));
+
+                }
+                b++;
+            }
+            if(a < first.len && b < second.len && first.inpos(a)->data == second.inpos(b)->data)
+            {
+                ans.pushback(first.inpos(a));
+                a++;
+                b++;
+            }
+
+    }
+    return ans;
 }
 vec<btree_node_section*> table::nodes_with_condition(string which, string sign, string val)
 {

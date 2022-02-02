@@ -57,15 +57,22 @@ int timestamp2int(string timestamp)
             day += timestamp[i];
         }
     }
-
     int y = sint2int(year), m = sint2int(month), d = sint2int(day);
     if(m > 12)
     {
-        throw("Month must be less than or equal to 12!\n");
+        throw("I've never seen month no." + month + " in a year!!\n");
+    }
+    else if(m < 1)
+    {
+        throw("Maybe you forgot to write a month?!\n");
     }
     if(d > 31)
     {
-        throw("We do not have " + day + " days in a month!\n");
+        throw("A month has just 31 days, so day " + day + " is invalid!! :(\n");
+    }
+    else if(d < 1)
+    {
+        throw("Maybe you forgot to write a day?!\n");
     }
     return 372 * y + 31 * (m - 1) + d - 1;
 

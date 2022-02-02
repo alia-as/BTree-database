@@ -20,5 +20,9 @@ int main()
         {
             cout << msg;
         }
+        catch(string msg)
+        {
+            cout << msg;
+        }
     }
 }

@@ -90,7 +90,7 @@ void vec<type>::print()
     vec_node<type> *temp = first;
     while(temp)
     {
-        cout << temp->value << " ";
+        cout << temp->value->data << " ";
         temp = temp->right_node;
     }
     cout << "\n";
