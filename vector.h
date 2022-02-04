@@ -134,6 +134,7 @@ type vec<type>::inpos(int pos)
     {
         return nodeinpos(pos)->value;
     }
+    return 0;
 }
 
 

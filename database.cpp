@@ -6,8 +6,10 @@ using namespace std;
 int main()
 {
     string query = "";
+    int queries = 0;
     while(true)
     {
+        cout << "Write your query:\n";
         getline(cin, query);
         try
         {
@@ -24,5 +26,6 @@ int main()
         {
             cout << msg;
         }
+        queries++;
     }
 }

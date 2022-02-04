@@ -14,6 +14,10 @@ int sint2int(string num )
     int ans=0;
     for (int r=0 ; r<n ; r++)
     {
+        if(num[r] < '0' || num[r] > '9')
+        {
+            throw("It seems that's not a integer here!\n");
+        }
         ans = ans*10 + ((int)num[r] - 48);
     }
     return ans*k;
@@ -89,6 +93,10 @@ string int2timestamp(int date)
 long long string2int(string name)
 {
     long long ans = 0, temp;
+    if(name[0] != '"' || name[name.size() - 1] != '"')
+    {
+        throw("It seems this is not a string or you forgot to put quotation marks!\n");
+    }
     name = name.substr(1, name.size() - 2);
     for(int i = 0; i < name.size(); i++)
     {
