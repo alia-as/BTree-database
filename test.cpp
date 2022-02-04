@@ -7,8 +7,7 @@
 using namespace std;
 int main()
 {
-
-//    while(true)
+    //    while(true)
 //    {
 //        string query;
 //        getline(cin, query);

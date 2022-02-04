@@ -128,7 +128,7 @@ type vec<type>::inpos(int pos)
 {
     if(pos >= len)
     {
-        cerr << "Out of range!!!\n";
+        throw("Out of range!!!\n");
     }
     else
     {

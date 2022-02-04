@@ -276,10 +276,6 @@ vec<btree_node_section*> btree::morethan_helper(long long val, btree_node *node,
     {
         for(int i = pos; i < node->how_many; i++)
         {
-            if(node->nodes[i] == 0)
-            {
-                cout << "It is 0 in pos " << i << " ";node->print();
-            }
             ans.pushback(node->nodes[i]);
         }
         for(int i = pos; i < node->how_many + 1; i++)

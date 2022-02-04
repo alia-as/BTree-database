@@ -9,7 +9,6 @@ int main()
     int queries = 0;
     while(true)
     {
-        cout << "Write your query:\n";
         getline(cin, query);
         try
         {
